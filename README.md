@@ -1,2 +1,2 @@
 # validatEHR
-R package for Aim 2
+R package for the paper, "Integrating EHR Subject to Outcome Misclassification with Validation Data Subject to Selection Bias"
