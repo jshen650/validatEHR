@@ -9,6 +9,7 @@
 #'
 #' @return Data frame containing error-free outcomes, misclassified outcomes, 
 #' and indices for individuals belonging to the validation sample
+#' @export
 genDat <- function(seedNum, p11, p10, valType, nA=NULL, alphaInt= NULL){
   set.seed(seedNum)
   

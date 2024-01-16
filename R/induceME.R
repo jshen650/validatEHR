@@ -5,6 +5,7 @@
 #' @param p10 Value for P(Y*=1 | Y=0), otherwise known as (1-Specificity)
 #'
 #' @return Vector of outcomes subject to misclassification
+#' @export
 induceME <- function(yVec, p11, p10){
   
   y.ABcopy = yVec
