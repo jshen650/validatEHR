@@ -4,10 +4,7 @@
 #' @param p11 Sensitivity, P(Y*=1 | Y=1)
 #' @param p10 Value for P(Y*=1 | Y=0), otherwise known as (1-Specificity)
 #'
-#' @return
-#' @export
-#'
-#' @examples
+#' @return Vector of outcomes subject to misclassification
 induceME <- function(yVec, p11, p10){
   
   y.ABcopy = yVec
