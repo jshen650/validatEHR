@@ -38,8 +38,8 @@ genDat <- function(seedNum, p11, p10, valType, nA=NULL, alphaInt= NULL){
   estE <- expit(cbind(1,x.A)%*%estAlpha_coef)
   
   ## generate outcomes subject to misclassification
-  y.ABmod <- induceME(y.A, p11=p11, p10=p10)
-  y.Both = data.frame(y.A, y.ABmod)
+  yStar <- induceME(y.A, p11=p11, p10=p10)
+  y.Both = data.frame(y.A, yStar)
   
   if(is.null(alphaInt)){
     alphaInt <- -2.8
