@@ -4,7 +4,7 @@
 #' @param p11 Sensitivity, P(Y*=1 | Y=1)
 #' @param p10 Value for P(Y*=1 | Y=0), otherwise known as (1-Specificity)
 #' @param valType Type of validation sample (SRS or non-probability)
-#' @param nA Size of entire probability sample
+#' @param n Size of entire probability sample
 #' @param alphaInt Intercept value relevant for size of a non-probability validation sample
 #' 
 #' @import stats
@@ -12,24 +12,24 @@
 #' @return Data frame containing error-free outcomes, misclassified outcomes, 
 #' and indices for individuals belonging to the validation sample
 #' @export
-genDat <- function(seedNum, p11, p10, valType, nA=NULL, alphaInt= NULL){
+genDat <- function(seedNum, p11, p10, valType, n=NULL, alphaInt= NULL){
   set.seed(seedNum)
   
-  ## for nA total individuals, consider 5 covariates
-  ## and binary exposure variable
-  if(is.null(nA)){
-    nA <- 5000
+  ## for n total individuals, consider 5 covariates
+  ## and binry exposure variable
+  if(is.null(n)){
+    n <- 5000
   }
   
   p <- 5
   
-  x.A <- matrix( rnorm(nA*(p),0,1),nA,(p))
+  x.A <- matrix( rnorm(n*(p),0,1),n,(p))
   pt.A <- expit(0.8+0.3*rowSums(x.A)) 
   
-  t.A <- rbinom(nA, 1, pt.A)
+  t.A <- rbinom(n, 1, pt.A)
   py.A <- expit(-3.9 + t.A+rowSums(x.A))
   
-  y.A <- rbinom(nA, 1, py.A) 
+  y.A <- rbinom(n, 1, py.A) 
   
   
   partDat = data.frame(t.A, x.A)
@@ -47,11 +47,11 @@ genDat <- function(seedNum, p11, p10, valType, nA=NULL, alphaInt= NULL){
   
   ## generate validation sample
   if(valType=="SRS"){
-    B.index <- rbinom(nA, size=1, prob=0.17)
+    B.index <- rbinom(n, size=1, prob=0.17)
   } else{
     alpha0 <- c(alphaInt, 0.5, 1, 1, 1, 1, rep(0, p-4))
     probB <- (1+exp(-cbind(1,t.A, x.A)%*%alpha0))^(-1)
-    B.index <- rbinom(nA,size = 1,prob = (probB) )
+    B.index <- rbinom(n,size = 1,prob = (probB) )
   }
   
   B.loc <- which(B.index == 1)

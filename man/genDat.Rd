@@ -4,7 +4,7 @@
 \alias{genDat}
 \title{Generate a simulated probability sample with a nested validation sample}
 \usage{
-genDat(seedNum, p11, p10, valType, nA = NULL, alphaInt = NULL)
+genDat(seedNum, p11, p10, valType, n = NULL, alphaInt = NULL)
 }
 \arguments{
 \item{seedNum}{Seed used for random generation}
@@ -15,7 +15,7 @@ genDat(seedNum, p11, p10, valType, nA = NULL, alphaInt = NULL)
 
 \item{valType}{Type of validation sample (SRS or non-probability)}
 
-\item{nA}{Size of entire probability sample}
+\item{n}{Size of entire probability sample}
 
 \item{alphaInt}{Intercept value relevant for size of a non-probability validation sample}
 }

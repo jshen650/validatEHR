@@ -38,7 +38,7 @@ Data can be simulated with the `genDat` function. Data set size, sensitivity of 
 ```{r example data, include=TRUE}
 ## Simulate data following paper specifications - say n=5000, with non-probability validation sample of size nV~850
 
-example_dat <- validatEHR::genDat(nA=5000, p11=0.67, p10=0.24, valType="non-probability", seedNum=215)
+example_dat <- validatEHR::genDat(n=5000, p11=0.67, p10=0.24, valType="non-probability", seedNum=215)
 str(example_dat)
 ```
 
