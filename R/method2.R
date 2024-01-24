@@ -10,7 +10,6 @@
 #' @param varX Variable names for modeling treatment propensity model
 #' @param varSelect Variable names for modeling validation sample selection model
 #'
-#'w, estNew, VNew, VtauN, VtauV2, estATE, tauN_B1_other
 #' @return Data frame containing weight used, final estimate of ATE, final variance estimate of ATE,
 #' estimate of ATE using validation data, variance estimate of ATE using validation data,
 #' estimate of ATE using silver standard outcomes, and variance estimate of ATE using silver standard outcomes
