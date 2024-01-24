@@ -6,6 +6,8 @@
 #' @param valType Type of validation sample (SRS or non-probability)
 #' @param nA Size of entire probability sample
 #' @param alphaInt Intercept value relevant for size of a non-probability validation sample
+#' 
+#' @import stats
 #'
 #' @return Data frame containing error-free outcomes, misclassified outcomes, 
 #' and indices for individuals belonging to the validation sample

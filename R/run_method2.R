@@ -97,7 +97,7 @@ run_method2 <- function(df, B.index, varExp, varGold, varSilver, varX, varSelect
   g2 = ((1-y.A)*yStar - p10*(1-y.A))*B.index*(nA/nB)
   
   
-  nVS = nXM+nXtilde+1 ## number of cols/rows for valOnly_Select
+  nVS = nXM+nXtilde+1 ## number of cols/rows relevant for estimating variance for validation data
   nAS = 4 ## number of cols/rows meant for non-val; to account for alpha, beta, p11, and p10 params
   
   matDim = nVS +nAS
