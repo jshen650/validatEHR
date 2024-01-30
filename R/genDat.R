@@ -29,7 +29,7 @@ genDat <- function(seedNum, p11, p10, valType, n=NULL, alphaInt= NULL){
   t.A <- rbinom(n, 1, pt.A)
   py.A <- expit(-3.9 + t.A+rowSums(x.A))
   
-  y.A <- rbinom(n, 1, py.A) 
+  y <- rbinom(n, 1, py.A) 
   
   
   partDat = data.frame(t.A, x.A)
@@ -38,8 +38,8 @@ genDat <- function(seedNum, p11, p10, valType, n=NULL, alphaInt= NULL){
   estE <- expit(cbind(1,x.A)%*%estAlpha_coef)
   
   ## generate outcomes subject to misclassification
-  yStar <- induceME(y.A, p11=p11, p10=p10)
-  y.Both = data.frame(y.A, yStar)
+  yStar <- induceME(y, p11=p11, p10=p10)
+  y.Both = data.frame(y, yStar)
   
   if(is.null(alphaInt)){
     alphaInt <- -2.8
@@ -47,19 +47,17 @@ genDat <- function(seedNum, p11, p10, valType, n=NULL, alphaInt= NULL){
   
   ## generate validation sample
   if(valType=="SRS"){
-    B.index <- rbinom(n, size=1, prob=0.17)
+    inVal <- rbinom(n, size=1, prob=0.17)
   } else{
     alpha0 <- c(alphaInt, 0.5, 1, 1, 1, 1, rep(0, p-4))
     probB <- (1+exp(-cbind(1,t.A, x.A)%*%alpha0))^(-1)
-    B.index <- rbinom(n,size = 1,prob = (probB) )
+    inVal <- rbinom(n,size = 1,prob = (probB) )
   }
   
-  B.loc <- which(B.index == 1)
-  nB <- length(B.loc) ## new
-  x.B <- x.A[B.loc,]
-  y.B <- y.A[B.loc]
+  B.loc <- which(inVal == 1)
   
-  allDat = data.frame(y.Both, B.index, t.A, x.A)
+  
+  allDat = data.frame(y.Both, inVal, t.A, x.A)
   
   return(allDat)
   
