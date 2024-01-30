@@ -25,12 +25,15 @@ of the simulation scenarios described in the paper and apply one of the
 two approaches described in the paper that leverages information from a
 validation data set containing gold standard outcomes.
 
-Data can be simulated with the `genDat` function. Data set size,
-sensitivity of the outcomes, (1-specificity) of the outcomes, type of
-validation data (e.g. “SRS” or “non-probability”), parameter for
-validation data set size, and seed number can all be specified. The
-corresponding arguments are “nA”, “p11”, “p10”, “valType”, “alphaInt”,
-and “seedNum”.
+Data can be simulated with the `genDat` function. This function requires
+specification of the following:  
+\* n = data set size  
+\* p11 = sensitivity of the outcomes  
+\* p10 = (1-specificity) of the outcomes  
+\* valType = type of validation data (e.g. “SRS” or “non-probability”)  
+\* alphaInt = parameter for validation data set size; if not specified,
+the default will generate size of \~850  
+\* seedNum = seed number
 
 ``` r
 ## Simulate data following paper specifications - say n=5000, with non-probability validation sample of size nV~850
@@ -38,15 +41,15 @@ and “seedNum”.
 example_dat <- validatEHR::genDat(n=5000, p11=0.67, p10=0.24, valType="non-probability", seedNum=215)
 str(example_dat)
 #> 'data.frame':    5000 obs. of  9 variables:
-#>  $ y.A    : int  0 0 0 0 0 0 0 0 0 0 ...
-#>  $ yStar  : int  1 0 0 0 0 0 1 0 0 1 ...
-#>  $ B.index: int  0 0 0 0 0 0 1 0 0 0 ...
-#>  $ t.A    : int  1 1 1 0 1 0 1 0 1 1 ...
-#>  $ X1     : num  0.337 -1.045 1.471 1.509 -0.781 ...
-#>  $ X2     : num  0.1402 -0.4261 -0.1201 0.0767 -1.0867 ...
-#>  $ X3     : num  0.272 -1.644 -0.986 -0.159 0.123 ...
-#>  $ X4     : num  1.4654 0.893 0.2559 -1.058 -0.0128 ...
-#>  $ X5     : num  0.2721 0.4022 0.5815 -0.4815 0.0927 ...
+#>  $ y    : int  0 0 0 0 0 0 0 0 0 0 ...
+#>  $ yStar: int  1 0 0 0 0 0 1 0 0 1 ...
+#>  $ inVal: int  0 0 0 0 0 0 1 0 0 0 ...
+#>  $ trt  : int  1 1 1 0 1 0 1 0 1 1 ...
+#>  $ X1   : num  0.337 -1.045 1.471 1.509 -0.781 ...
+#>  $ X2   : num  0.1402 -0.4261 -0.1201 0.0767 -1.0867 ...
+#>  $ X3   : num  0.272 -1.644 -0.986 -0.159 0.123 ...
+#>  $ X4   : num  1.4654 0.893 0.2559 -1.058 -0.0128 ...
+#>  $ X5   : num  0.2721 0.4022 0.5815 -0.4815 0.0927 ...
 ```
 
 The estimate of the ATE and its variance using gold standard outcomes
@@ -63,15 +66,15 @@ leads to minimum variance for obtaining the final estimate of the ATE.
 ## and all silver standard outcomes
 
 ## specify relevant variables for treatment propensity model
-varX = c("X1", "X2", "X3", "X4", "X5")
+varTrtMod = c("X1", "X2", "X3", "X4", "X5")
 
 ## specify relevant variables for validation sample selection model - 
-## here, includes the same covariates as varX
-varSelect = varX
+## here, includes the same covariates as varTrtMod
+varSelectMod = varTrtMod
 
-example_ATE <- validatEHR::run_method4(example_dat, B.index=example_dat$B.index, varExp="t.A",
-                                       varGold="y.A", varSilver="yStar", varX=varX, 
-                                       varSelect = varSelect, opt="TRUE")
+example_ATE <- validatEHR::run_est4(example_dat, inVal=example_dat$inVal, varTrt="trt",
+                                       varGold="y", varSilver="yStar", varTrtMod=varTrtMod, 
+                                       varSelectMod = varSelectMod, opt="TRUE")
 
 ## display optimal choice of weight w, final estimate of ATE, final variance estimate of ATE,
 # estimate of ATE using validation data, variance estimate of ATE using validation data,

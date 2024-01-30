@@ -3,6 +3,6 @@
 export(expit)
 export(genDat)
 export(induceME)
-export(run_method2)
-export(run_method4)
+export(run_est2)
+export(run_est4)
 import(stats)

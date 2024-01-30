@@ -33,7 +33,13 @@ This is a basic example which shows how to generate a data set from one of the s
 library(validatEHR)
 ```
 
-Data can be simulated with the `genDat` function. Data set size, sensitivity of the outcomes, (1-specificity) of the outcomes, type of validation data (e.g. "SRS" or "non-probability"), parameter for validation data set size, and seed number can all be specified. The corresponding arguments are "nA", "p11", "p10", "valType", "alphaInt", and "seedNum".
+Data can be simulated with the `genDat` function. This function requires specification of the following:  
+* n = data set size  
+* p11 = sensitivity of the outcomes  
+* p10 = (1-specificity) of the outcomes  
+* valType = type of validation data (e.g. "SRS" or "non-probability")  
+* alphaInt = parameter for validation data set size; if not specified, the default will generate size of ~850  
+* seedNum = seed number
 
 ```{r example data, include=TRUE}
 ## Simulate data following paper specifications - say n=5000, with non-probability validation sample of size nV~850
@@ -49,15 +55,15 @@ The estimate of the ATE and its variance using gold standard outcomes from the v
 ## and all silver standard outcomes
 
 ## specify relevant variables for treatment propensity model
-varX = c("X1", "X2", "X3", "X4", "X5")
+varTrtMod = c("X1", "X2", "X3", "X4", "X5")
 
 ## specify relevant variables for validation sample selection model - 
-## here, includes the same covariates as varX
-varSelect = varX
+## here, includes the same covariates as varTrtMod
+varSelectMod = varTrtMod
 
-example_ATE <- validatEHR::run_method4(example_dat, B.index=example_dat$B.index, varExp="t.A",
-                                       varGold="y.A", varSilver="yStar", varX=varX, 
-                                       varSelect = varSelect, opt="TRUE")
+example_ATE <- validatEHR::run_est4(example_dat, inVal=example_dat$inVal, varTrt="trt",
+                                       varGold="y", varSilver="yStar", varTrtMod=varTrtMod, 
+                                       varSelectMod = varSelectMod, opt="TRUE")
 
 ## display optimal choice of weight w, final estimate of ATE, final variance estimate of ATE,
 # estimate of ATE using validation data, variance estimate of ATE using validation data,

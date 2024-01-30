@@ -16,7 +16,7 @@
 #' estimate of ATE using validation data, variance estimate of ATE using validation data,
 #' estimate of ATE using silver standard outcomes, and variance estimate of ATE using silver standard outcomes
 #' @export
-run_method4 <- function(df,inVal, varTrt, varGold, varSilver, varTrtMod, varSelectMod, opt){
+run_est4 <- function(df,inVal, varTrt, varGold, varSilver, varTrtMod, varSelectMod, opt){
   ## gather validation data
   valDat <- df[which(inVal==1),]
   
