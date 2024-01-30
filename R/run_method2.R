@@ -3,35 +3,35 @@
 #'
 #' @param df Data frame containing exposure status, gold-standard outcomes, silver-standard outcomes, 
 #' and all relevant variables for analyses
-#' @param B.index Vector that indicates whether an individual was included in the validation data (=1 for included)
-#' @param varExp Variable name for exposure
+#' @param inVal Vector that indicates whether an individual was included in the validation data (=1 for included)
+#' @param varTrt Variable name for treatment/exposure
 #' @param varGold Variable name for gold-standard outcome
 #' @param varSilver Variable name for silver-standard outcome
-#' @param varX Variable names for modeling treatment propensity model
-#' @param varSelect Variable names for modeling validation sample selection model
+#' @param varTrtMod Variable names for modeling treatment propensity model
+#' @param varSelectMod Variable names for modeling validation sample selection model
 #'
 #' @return Data frame containing weight used, final estimate of ATE, final variance estimate of ATE,
 #' estimate of ATE using validation data, variance estimate of ATE using validation data,
 #' estimate of ATE using silver standard outcomes, and variance estimate of ATE using silver standard outcomes
 #' @export
-run_method2 <- function(df, B.index, varExp, varGold, varSilver, varX, varSelect){
+run_method2 <- function(df, inVal, varTrt, varGold, varSilver, varTrtMod, varSelectMod){
   
   ## gather validation data
-  valDat <- df[which(B.index==1),]
+  valDat <- df[which(inVal==1),]
   
   
-  t.A = df[,varExp]
+  t.A = df[,varTrt]
   y.A = df[,varGold]
   nB <- nrow(valDat)
-  B.loc = which(B.index==1)
+  inVal.loc = which(inVal==1)
   
   ## xCols must be columns of data frame pertaining to main effects
-  x.A = df[, varX]
+  x.A = df[, varTrtMod]
   
   
-  t.B = valDat[,varExp]
+  t.B = valDat[,varTrt]
   y.B = valDat[,varGold]
-  x.B = x.A[B.loc,]
+  x.B = x.A[inVal.loc,]
   yStar = df[,varSilver]
   y.AB=yStar
   
@@ -43,8 +43,8 @@ run_method2 <- function(df, B.index, varExp, varGold, varSilver, varX, varSelect
   estAlpha <- glm(t.A ~ ., data=partDat, family="binomial")
   estE = predict.glm(estAlpha, partDat, type="response")
   
-  partDat2 = data.frame(B.index, t.A, df[,c(varSelect)])
-  estAlphaB <- glm(B.index ~ . , data=partDat2, family="binomial")
+  partDat2 = data.frame(inVal, t.A, df[,c(varSelectMod)])
+  estAlphaB <- glm(inVal ~ . , data=partDat2, family="binomial")
   estAlphaB_coef <- coef(estAlphaB)
   estB <- predict.glm(estAlphaB, partDat2, type="response")
   
@@ -61,15 +61,15 @@ run_method2 <- function(df, B.index, varExp, varGold, varSilver, varX, varSelect
   ## estimate ATE using gold standard outcomes from validation individuals
   w1 = estE*estB
   w2 = estB*(1-estE)
-  tauV_sum1 = mean (B.index*t.A*y.A/w1)
-  tauV_sum2 = mean (B.index*(1-t.A)*y.A/w2)
+  tauV_sum1 = mean (inVal*t.A*y.A/w1)
+  tauV_sum2 = mean (inVal*(1-t.A)*y.A/w2)
   estATE = tauV_sum1 - tauV_sum2
   
   ## estimate ATE using silver standard outcomes from non-validation individuals
   wN1 = estE*(1-estB)
   wN2 = (1-estE)*(1-estB)
-  tauN_sum1 = (1/(sum((1-B.index)*t.A/wN1)))*sum((1-B.index)*t.A*yStar/wN1)
-  tauN_sum2 = (1/(sum((1-B.index)*(1-t.A)/wN2)))*sum((1-B.index)*(1-t.A)*yStar/wN2)
+  tauN_sum1 = (1/(sum((1-inVal)*t.A/wN1)))*sum((1-inVal)*t.A*yStar/wN1)
+  tauN_sum2 = (1/(sum((1-inVal)*(1-t.A)/wN2)))*sum((1-inVal)*(1-t.A)*yStar/wN2)
   tauN_B1_other = (1/(p11-p10))*(tauN_sum1 - tauN_sum2)
   
   ## design matrix relevant for treatment propensity model
@@ -83,18 +83,18 @@ run_method2 <- function(df, B.index, varExp, varGold, varSilver, varX, varSelect
   nXtilde = ncol(xtilde) 
   
   ## weighted regression equivalent for estimating Hajek form of the ATE
-  R = ((1-B.index)*t.A)/wN1 + ((1-B.index)*(1-t.A))/wN2
+  R = ((1-inVal)*t.A)/wN1 + ((1-inVal)*(1-t.A))/wN2
   regCoef = coef(glm(yStar ~ t.A, weights=R))
   alpha = regCoef[1]
   beta = regCoef[2]
   
   yScore = yStar - alpha - beta*(p11-p10)*t.A ## estimating equation involving Y*
   tScore = (t.A - estE)*estB ## estimating equation involving T
-  V_est = B.index-estB
-  dConst = ((1-B.index)*(1-t.A)/wN2)*estE - ((1-B.index)*(t.A)/wN1)*(1-estE)
-  zConst = ((1-B.index)*t.A/wN1)*estB + ((1-B.index)*(1-t.A)/wN2)*estB
-  g1 =(y.A*yStar - p11*y.A )*B.index*(nA/nB)
-  g2 = ((1-y.A)*yStar - p10*(1-y.A))*B.index*(nA/nB)
+  V_est = inVal-estB
+  dConst = ((1-inVal)*(1-t.A)/wN2)*estE - ((1-inVal)*(t.A)/wN1)*(1-estE)
+  zConst = ((1-inVal)*t.A/wN1)*estB + ((1-inVal)*(1-t.A)/wN2)*estB
+  g1 =(y.A*yStar - p11*y.A )*inVal*(nA/nB)
+  g2 = ((1-y.A)*yStar - p10*(1-y.A))*inVal*(nA/nB)
   
   
   nVS = nXM+nXtilde+1 ## number of cols/rows relevant for estimating variance for validation data
@@ -122,11 +122,11 @@ run_method2 <- function(df, B.index, varExp, varGold, varSilver, varX, varSelect
   }
   
   for(j in 2:(nXM+1)){
-    AA[1, j] = mean( ( (B.index*t.A*y.A*(1-estE))/(estB*(estE)) + (B.index*(1-t.A)*y.A*estE)/(estB*(1-estE)))*xM[,j-1]  )
+    AA[1, j] = mean( ( (inVal*t.A*y.A*(1-estE))/(estB*(estE)) + (inVal*(1-t.A)*y.A*estE)/(estB*(1-estE)))*xM[,j-1]  )
   }
   
   for(j in (nXM+2):(nVS)){
-    AA[1, j] = mean( ( (B.index*t.A*y.A*(1-estB))/(estB*(estE)) - (B.index*(1-t.A)*y.A*(1-estB))/(estB*(1-estE)))*xtilde[,j-nXM-1]  )
+    AA[1, j] = mean( ( (inVal*t.A*y.A*(1-estB))/(estB*(estE)) - (inVal*(1-t.A)*y.A*(1-estB))/(estB*(1-estE)))*xtilde[,j-nXM-1]  )
   }
   
   for(i in 2:(nXM+1)){
@@ -152,8 +152,8 @@ run_method2 <- function(df, B.index, varExp, varGold, varSilver, varX, varSelect
   AA[(nVS+1), (nVS+4)] <- mean(-R*beta*t.A)
   AA[(nVS+2), (nVS+3)] <- mean(R*beta*t.A^2)
   AA[(nVS+2), (nVS+4)] <- mean(-R*beta*t.A^2)
-  AA[(nVS+3), (nVS+3)] <- mean(y.A*B.index*(nA/nB) )
-  AA[(nVS+4), (nVS+4)] <- mean((1-y.A)*B.index*(nA/nB))
+  AA[(nVS+3), (nVS+3)] <- mean(y.A*inVal*(nA/nB) )
+  AA[(nVS+4), (nVS+4)] <- mean((1-y.A)*inVal*(nA/nB))
   
   for(j in (nXM+2):(nXM+1+nXtilde)){
     AA[(nVS+1), (j-1)] = mean(-zConst*xtilde[,j-nXM-1]*yScore)
@@ -171,7 +171,7 @@ run_method2 <- function(df, B.index, varExp, varGold, varSilver, varX, varSelect
   ##### the meat B
   BB = matrix(0,matDim, matDim)
   
-  getEst = ( B.index*t.A*y.A/w1 ) - (B.index*(1-t.A)*y.A/w2) - estATE
+  getEst = ( inVal*t.A*y.A/w1 ) - (inVal*(1-t.A)*y.A/w2) - estATE
   BB[1,1] = mean(getEst^2) 
   
   for(j in 2:(nXM+1)){
@@ -183,11 +183,11 @@ run_method2 <- function(df, B.index, varExp, varGold, varSilver, varX, varSelect
   }
   
   for(j in (nXM+2):nVS){
-    BB[1, j] = mean(getEst*((B.index-estB)*xtilde[,j-nXM-1]))
+    BB[1, j] = mean(getEst*((inVal-estB)*xtilde[,j-nXM-1]))
   }
   
   for(i in (nXM+2):nVS){
-    BB[i, 1] = mean(getEst*((B.index-estB)*xtilde[,i-nXM-1]))
+    BB[i, 1] = mean(getEst*((inVal-estB)*xtilde[,i-nXM-1]))
   }
   
   for(i in 2:(nXM+1)){
@@ -198,20 +198,20 @@ run_method2 <- function(df, B.index, varExp, varGold, varSilver, varX, varSelect
   
   for(i in (nXM+2):nVS){
     for(j in (nXM+2):nVS){
-      BB[i, j] = mean( ( (B.index-estB)*xtilde[,(i-nXM-1)])* ((B.index-estB)*xtilde[,(j-nXM-1)]))
+      BB[i, j] = mean( ( (inVal-estB)*xtilde[,(i-nXM-1)])* ((inVal-estB)*xtilde[,(j-nXM-1)]))
     }
   }
   
   for(i in (nXM+2):nVS){
     for(j in 2:(nXM+1)){
-      BB[i, j] = mean( ((B.index-estB)*xtilde[,(i-nXM-1)]) *  ( (t.A-estE)*xM[,j-1]*estB) )  
+      BB[i, j] = mean( ((inVal-estB)*xtilde[,(i-nXM-1)]) *  ( (t.A-estE)*xM[,j-1]*estB) )  
     }
   }
   
 
   for(i in 2:(nXM+1)){
     for(j in (nXM+2):nVS){
-      BB[i, j] = mean( ( (t.A-estE)*xM[,i-1]*estB)*((B.index-estB)*xtilde[,(j-nXM-1)] ))
+      BB[i, j] = mean( ( (t.A-estE)*xM[,i-1]*estB)*((inVal-estB)*xtilde[,(j-nXM-1)] ))
     }
   }
   
